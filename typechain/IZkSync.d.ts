@@ -3651,6 +3651,7 @@ export class IZkSync extends Contract {
     requestL2Transaction(
       _contractL2: string,
       _l2Value: BigNumberish,
+      _amount: BigNumberish,
       _calldata: BytesLike,
       _l2GasLimit: BigNumberish,
       _l2GasPerPubdataByteLimit: BigNumberish,
