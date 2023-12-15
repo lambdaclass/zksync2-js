@@ -418,7 +418,7 @@ function AdapterL1(Base) {
             });
             (_h = overrides.value) !== null && _h !== void 0 ? _h : (overrides.value = baseCost.add(operatorTip).add(l2Value));
             await (0, utils_1.checkBaseCost)(baseCost, overrides.value);
-            return await zksyncContract.populateTransaction.requestL2Transaction(contractAddress, l2Value, l2Value, calldata, l2GasLimit, utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT, factoryDeps, refundRecipient, overrides);
+            return await zksyncContract.populateTransaction.requestL2Transaction(contractAddress, l2Value, baseCost.add(operatorTip).add(l2Value), calldata, l2GasLimit, utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT, factoryDeps, refundRecipient, overrides);
         }
     };
 }

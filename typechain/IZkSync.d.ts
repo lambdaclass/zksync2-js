@@ -64,7 +64,7 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     "proveL1ToL2TransactionStatus(bytes32,uint256,uint256,uint16,bytes32[],uint8)": FunctionFragment;
     "proveL2LogInclusion(uint256,uint256,tuple,bytes32[])": FunctionFragment;
     "proveL2MessageInclusion(uint256,uint256,tuple,bytes32[])": FunctionFragment;
-    "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)": FunctionFragment;
+    "requestL2Transaction(address,uint256,uint256,bytes,uint256,uint256,bytes[],address)": FunctionFragment;
     "revertBatches(uint256)": FunctionFragment;
     "setPendingAdmin(address)": FunctionFragment;
     "setPendingGovernor(address)": FunctionFragment;
@@ -328,6 +328,7 @@ interface IZkSyncInterface extends ethers.utils.Interface {
     functionFragment: "requestL2Transaction",
     values: [
       string,
+      BigNumberish,
       BigNumberish,
       BytesLike,
       BigNumberish,
@@ -1232,6 +1233,7 @@ export class IZkSync extends Contract {
     requestL2Transaction(
       _contractL2: string,
       _l2Value: BigNumberish,
+      _amount: BigNumberish,
       _calldata: BytesLike,
       _l2GasLimit: BigNumberish,
       _l2GasPerPubdataByteLimit: BigNumberish,
@@ -1240,9 +1242,10 @@ export class IZkSync extends Contract {
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)"(
+    "requestL2Transaction(address,uint256,uint256,bytes,uint256,uint256,bytes[],address)"(
       _contractL2: string,
       _l2Value: BigNumberish,
+      _amount: BigNumberish,
       _calldata: BytesLike,
       _l2GasLimit: BigNumberish,
       _l2GasPerPubdataByteLimit: BigNumberish,
@@ -1821,6 +1824,7 @@ export class IZkSync extends Contract {
   requestL2Transaction(
     _contractL2: string,
     _l2Value: BigNumberish,
+    _amount: BigNumberish,
     _calldata: BytesLike,
     _l2GasLimit: BigNumberish,
     _l2GasPerPubdataByteLimit: BigNumberish,
@@ -1829,9 +1833,10 @@ export class IZkSync extends Contract {
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)"(
+  "requestL2Transaction(address,uint256,uint256,bytes,uint256,uint256,bytes[],address)"(
     _contractL2: string,
     _l2Value: BigNumberish,
+    _amount: BigNumberish,
     _calldata: BytesLike,
     _l2GasLimit: BigNumberish,
     _l2GasPerPubdataByteLimit: BigNumberish,
@@ -2413,6 +2418,7 @@ export class IZkSync extends Contract {
     requestL2Transaction(
       _contractL2: string,
       _l2Value: BigNumberish,
+      _amount: BigNumberish,
       _calldata: BytesLike,
       _l2GasLimit: BigNumberish,
       _l2GasPerPubdataByteLimit: BigNumberish,
@@ -2421,9 +2427,10 @@ export class IZkSync extends Contract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)"(
+    "requestL2Transaction(address,uint256,uint256,bytes,uint256,uint256,bytes[],address)"(
       _contractL2: string,
       _l2Value: BigNumberish,
+      _amount: BigNumberish,
       _calldata: BytesLike,
       _l2GasLimit: BigNumberish,
       _l2GasPerPubdataByteLimit: BigNumberish,
@@ -3045,6 +3052,7 @@ export class IZkSync extends Contract {
     requestL2Transaction(
       _contractL2: string,
       _l2Value: BigNumberish,
+      _amount: BigNumberish,
       _calldata: BytesLike,
       _l2GasLimit: BigNumberish,
       _l2GasPerPubdataByteLimit: BigNumberish,
@@ -3053,9 +3061,10 @@ export class IZkSync extends Contract {
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)"(
+    "requestL2Transaction(address,uint256,uint256,bytes,uint256,uint256,bytes[],address)"(
       _contractL2: string,
       _l2Value: BigNumberish,
+      _amount: BigNumberish,
       _calldata: BytesLike,
       _l2GasLimit: BigNumberish,
       _l2GasPerPubdataByteLimit: BigNumberish,
@@ -3660,9 +3669,10 @@ export class IZkSync extends Contract {
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    "requestL2Transaction(address,uint256,bytes,uint256,uint256,bytes[],address)"(
+    "requestL2Transaction(address,uint256,uint256,bytes,uint256,uint256,bytes[],address)"(
       _contractL2: string,
       _l2Value: BigNumberish,
+      _amount: BigNumberish,
       _calldata: BytesLike,
       _l2GasLimit: BigNumberish,
       _l2GasPerPubdataByteLimit: BigNumberish,
