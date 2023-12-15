@@ -730,7 +730,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             return await zksyncContract.populateTransaction.requestL2Transaction(
                 contractAddress,
                 l2Value,
-                l2Value,
+                baseCost.add(operatorTip).add(l2Value),
                 calldata,
                 l2GasLimit,
                 REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
