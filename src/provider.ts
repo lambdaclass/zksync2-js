@@ -23,7 +23,7 @@ import {
     TransactionStatus,
     Fee,
     Network as ZkSyncNetwork,
-    RawBlockTransaction
+    RawBlockTransaction,
 } from "./types";
 import {
     CONTRACT_DEPLOYER,
