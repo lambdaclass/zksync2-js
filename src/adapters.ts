@@ -193,6 +193,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
 
             if (transaction.token == ETH_ADDRESS || nativeERC20 == transaction.token) {
+                console.error("NATIVE ERC20 VERSION")
                 const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
                 const gasLimit = scaleGasLimit(baseGasLimit);
 
