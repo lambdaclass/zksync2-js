@@ -489,6 +489,9 @@ class Provider extends ethers_1.ethers.providers.JsonRpcProvider {
     async getRawBlockTransactions(number) {
         return await this.send("zks_getRawBlockTransactions", [number]);
     }
+    async getConversionRate() {
+        return await this.send("zks_getConversionRate", []);
+    }
     async getWithdrawTx(transaction) {
         var _a, _b, _c;
         var _d;

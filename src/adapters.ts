@@ -329,7 +329,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             );
 
             // if (token == ETH_ADDRESS) {
-            overrides.value ??= baseCost.add(operatorTip).add(amount);
+            overrides.value ??= baseCost.add(operatorTip);
 
             return {
                 contractAddress: to,
@@ -717,15 +717,19 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             await insertGasPrice(this._providerL1(), overrides);
             const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
 
-            const baseCost = await this.getBaseCost({
+            // This base cost has to be priced in the ERC20 token because it will be paid on L2.
+            let baseCost = await this.getBaseCost({
                 gasPrice: await gasPriceForEstimation,
                 gasPerPubdataByte,
                 gasLimit: l2GasLimit,
             });
 
-            overrides.value ??= baseCost.add(operatorTip).add(l2Value);
+            const conversionRate = await this._providerL2().getConversionRate();
+            baseCost = baseCost.mul(conversionRate);
 
-            await checkBaseCost(baseCost, overrides.value);
+            overrides.value = 0;
+
+            await checkBaseCost(baseCost, l2Value);
 
             return await zksyncContract.populateTransaction.requestL2Transaction(
                 contractAddress,

@@ -627,6 +627,10 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         return await this.send("zks_getRawBlockTransactions", [number]);
     }
 
+    async getConversionRate(): Promise<BigNumber> {
+        return await this.send("zks_getConversionRate", []);
+    }
+
     async getWithdrawTx(transaction: {
         token: Address;
         amount: BigNumberish;
