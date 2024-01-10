@@ -186,10 +186,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             overrides?: ethers.PayableOverrides;
             approveOverrides?: ethers.Overrides;
             customBridgeData?: BytesLike;
-        }): Promise<PriorityOpResponse> {
-            const depositTx = await this.getDepositTx(transaction);
-
-            // if (transaction.token == ETH_ADDRESS) {
+        }, nativeERC20?: Address): Promise<PriorityOpResponse> {
+            const depositTx = await this.getDepositTx(transaction, nativeERC20);
+            
+            if (transaction.token == ETH_ADDRESS || nativeERC20 == transaction.token) {
             const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
             const gasLimit = scaleGasLimit(baseGasLimit);
 
@@ -197,46 +197,46 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             depositTx.overrides.gasLimit ??= gasLimit;
 
             return this.requestExecute(depositTx);
-            // } else {
-            //     const bridgeContracts = await this.getL1BridgeContracts();
-            //     if (transaction.approveERC20) {
-            //         let l2WethToken = ethers.constants.AddressZero;
-            //         try {
-            //             l2WethToken = await bridgeContracts.weth.l2TokenAddress(transaction.token);
-            //         } catch (e) {}
-            //         // If the token is Wrapped Ether, use its bridge.
-            //         const proposedBridge =
-            //             l2WethToken != ethers.constants.AddressZero
-            //                 ? bridgeContracts.weth.address
-            //                 : bridgeContracts.erc20.address;
-            //         const bridgeAddress = transaction.bridgeAddress
-            //             ? transaction.bridgeAddress
-            //             : proposedBridge;
+            } else {
+                const bridgeContracts = await this.getL1BridgeContracts();
+                if (transaction.approveERC20) {
+                    let l2WethToken = ethers.constants.AddressZero;
+                    try {
+                        l2WethToken = await bridgeContracts.weth.l2TokenAddress(transaction.token);
+                    } catch (e) {}
+                    // If the token is Wrapped Ether, use its bridge.
+                    const proposedBridge =
+                        l2WethToken != ethers.constants.AddressZero
+                            ? bridgeContracts.weth.address
+                            : bridgeContracts.erc20.address;
+                    const bridgeAddress = transaction.bridgeAddress
+                        ? transaction.bridgeAddress
+                        : proposedBridge;
 
-            //         // We only request the allowance if the current one is not enough.
-            //         const allowance = await this.getAllowanceL1(transaction.token, bridgeAddress);
-            //         if (allowance.lt(transaction.amount)) {
-            //             const approveTx = await this.approveERC20(
-            //                 transaction.token,
-            //                 transaction.amount,
-            //                 {
-            //                     bridgeAddress,
-            //                     ...transaction.approveOverrides,
-            //                 },
-            //             );
-            //             await approveTx.wait();
-            //         }
-            //     }
+                    // We only request the allowance if the current one is not enough.
+                    const allowance = await this.getAllowanceL1(transaction.token, bridgeAddress);
+                    if (allowance.lt(transaction.amount)) {
+                        const approveTx = await this.approveERC20(
+                            transaction.token,
+                            transaction.amount,
+                            {
+                                bridgeAddress,
+                                ...transaction.approveOverrides,
+                            },
+                        );
+                        await approveTx.wait();
+                    }
+                }
 
-            //     const baseGasLimit = await this._providerL1().estimateGas(depositTx);
-            //     const gasLimit = scaleGasLimit(baseGasLimit);
+                const baseGasLimit = await this._providerL1().estimateGas(depositTx);
+                const gasLimit = scaleGasLimit(baseGasLimit);
 
-            //     depositTx.gasLimit ??= gasLimit;
+                depositTx.gasLimit ??= gasLimit;
 
-            //     return await this._providerL2().getPriorityOpResponse(
-            //         await this._signerL1().sendTransaction(depositTx),
-            //     );
-            // }
+                return await this._providerL2().getPriorityOpResponse(
+                    await this._signerL1().sendTransaction(depositTx),
+                );
+            }
         }
 
         async estimateGasDeposit(transaction: {
@@ -274,7 +274,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             customBridgeData?: BytesLike;
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
-        }): Promise<any> {
+        }, nativeERC20?: Address): Promise<any> {
             const bridgeContracts = await this.getL1BridgeContracts();
             if (transaction.bridgeAddress != null) {
                 bridgeContracts.erc20 = bridgeContracts.erc20.attach(transaction.bridgeAddress);
@@ -328,7 +328,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 tx.gasPerPubdataByte,
             );
 
-            // if (token == ETH_ADDRESS) {
+            if (token == ETH_ADDRESS || nativeERC20 == token) {
             overrides.value ??= baseCost.add(operatorTip).add(amount);
 
             return {
@@ -340,31 +340,31 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 l2GasLimit: tx.l2GasLimit!,
                 ...tx,
             };
-            // } else {
-            //     let refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
-            //     const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address] = [
-            //         to,
-            //         token,
-            //         amount,
-            //         tx.l2GasLimit,
-            //         tx.gasPerPubdataByte,
-            //         refundRecipient,
-            //     ];
+            } else {
+                let refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
+                const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address] = [
+                    to,
+                    token,
+                    amount,
+                    tx.l2GasLimit,
+                    tx.gasPerPubdataByte,
+                    refundRecipient,
+                ];
 
-            //     overrides.value ??= baseCost.add(operatorTip);
-            //     await checkBaseCost(baseCost, overrides.value);
+                overrides.value ??= baseCost.add(operatorTip);
+                await checkBaseCost(baseCost, overrides.value);
 
-            //     let l2WethToken = ethers.constants.AddressZero;
-            //     try {
-            //         l2WethToken = await bridgeContracts.weth.l2TokenAddress(tx.token);
-            //     } catch (e) {}
+                let l2WethToken = ethers.constants.AddressZero;
+                try {
+                    l2WethToken = await bridgeContracts.weth.l2TokenAddress(tx.token);
+                } catch (e) {}
 
-            //     const bridge =
-            //         l2WethToken != ethers.constants.AddressZero
-            //             ? bridgeContracts.weth
-            //             : bridgeContracts.erc20;
-            //     return await bridge.populateTransaction.deposit(...args, overrides);
-            // }
+                const bridge =
+                    l2WethToken != ethers.constants.AddressZero
+                        ? bridgeContracts.weth
+                        : bridgeContracts.erc20;
+                return await bridge.populateTransaction.deposit(...args, overrides);
+            }
         }
 
         // Retrieves the full needed ETH fee for the deposit.
