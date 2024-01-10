@@ -173,30 +173,33 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             );
         }
 
-        async deposit(transaction: {
-            token: Address;
-            amount: BigNumberish;
-            to?: Address;
-            operatorTip?: BigNumberish;
-            bridgeAddress?: Address;
-            approveERC20?: boolean;
-            l2GasLimit?: BigNumberish;
-            gasPerPubdataByte?: BigNumberish;
-            refundRecipient?: Address;
-            overrides?: ethers.PayableOverrides;
-            approveOverrides?: ethers.Overrides;
-            customBridgeData?: BytesLike;
-        }, nativeERC20?: Address): Promise<PriorityOpResponse> {
+        async deposit(
+            transaction: {
+                token: Address;
+                amount: BigNumberish;
+                to?: Address;
+                operatorTip?: BigNumberish;
+                bridgeAddress?: Address;
+                approveERC20?: boolean;
+                l2GasLimit?: BigNumberish;
+                gasPerPubdataByte?: BigNumberish;
+                refundRecipient?: Address;
+                overrides?: ethers.PayableOverrides;
+                approveOverrides?: ethers.Overrides;
+                customBridgeData?: BytesLike;
+            },
+            nativeERC20?: Address,
+        ): Promise<PriorityOpResponse> {
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
-            
+
             if (transaction.token == ETH_ADDRESS || nativeERC20 == transaction.token) {
-            const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
-            const gasLimit = scaleGasLimit(baseGasLimit);
+                const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
+                const gasLimit = scaleGasLimit(baseGasLimit);
 
-            depositTx.overrides ??= {};
-            depositTx.overrides.gasLimit ??= gasLimit;
+                depositTx.overrides ??= {};
+                depositTx.overrides.gasLimit ??= gasLimit;
 
-            return this.requestExecute(depositTx);
+                return this.requestExecute(depositTx);
             } else {
                 const bridgeContracts = await this.getL1BridgeContracts();
                 if (transaction.approveERC20) {
@@ -263,18 +266,21 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             return scaleGasLimit(baseGasLimit);
         }
 
-        async getDepositTx(transaction: {
-            token: Address;
-            amount: BigNumberish;
-            to?: Address;
-            operatorTip?: BigNumberish;
-            bridgeAddress?: Address;
-            l2GasLimit?: BigNumberish;
-            gasPerPubdataByte?: BigNumberish;
-            customBridgeData?: BytesLike;
-            refundRecipient?: Address;
-            overrides?: ethers.PayableOverrides;
-        }, nativeERC20?: Address): Promise<any> {
+        async getDepositTx(
+            transaction: {
+                token: Address;
+                amount: BigNumberish;
+                to?: Address;
+                operatorTip?: BigNumberish;
+                bridgeAddress?: Address;
+                l2GasLimit?: BigNumberish;
+                gasPerPubdataByte?: BigNumberish;
+                customBridgeData?: BytesLike;
+                refundRecipient?: Address;
+                overrides?: ethers.PayableOverrides;
+            },
+            nativeERC20?: Address,
+        ): Promise<any> {
             const bridgeContracts = await this.getL1BridgeContracts();
             if (transaction.bridgeAddress != null) {
                 bridgeContracts.erc20 = bridgeContracts.erc20.attach(transaction.bridgeAddress);
@@ -329,17 +335,17 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             );
 
             if (token == ETH_ADDRESS || nativeERC20 == token) {
-            overrides.value ??= baseCost.add(operatorTip).add(amount);
+                overrides.value ??= baseCost.add(operatorTip).add(amount);
 
-            return {
-                contractAddress: to,
-                calldata: "0x",
-                l2Value: amount,
-                // For some reason typescript can not deduce that we've already set the
-                // tx.l2GasLimit
-                l2GasLimit: tx.l2GasLimit!,
-                ...tx,
-            };
+                return {
+                    contractAddress: to,
+                    calldata: "0x",
+                    l2Value: amount,
+                    // For some reason typescript can not deduce that we've already set the
+                    // tx.l2GasLimit
+                    l2GasLimit: tx.l2GasLimit!,
+                    ...tx,
+                };
             } else {
                 let refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
                 const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address] = [

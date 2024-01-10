@@ -65,7 +65,7 @@ declare const Wallet_base: {
             overrides?: ethers.PayableOverrides;
             approveOverrides?: ethers.Overrides;
             customBridgeData?: ethers.utils.BytesLike;
-        }): Promise<import("./types").PriorityOpResponse>;
+        }, nativeERC20?: string): Promise<import("./types").PriorityOpResponse>;
         estimateGasDeposit(transaction: {
             token: string;
             amount: ethers.BigNumberish;
@@ -89,7 +89,7 @@ declare const Wallet_base: {
             customBridgeData?: ethers.utils.BytesLike;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }): Promise<any>;
+        }, nativeERC20?: string): Promise<any>;
         getFullRequiredDepositFee(transaction: {
             token: string;
             to?: string;

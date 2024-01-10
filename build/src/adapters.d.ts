@@ -40,7 +40,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             overrides?: ethers.PayableOverrides;
             approveOverrides?: ethers.Overrides;
             customBridgeData?: BytesLike;
-        }): Promise<PriorityOpResponse>;
+        }, nativeERC20?: Address): Promise<PriorityOpResponse>;
         estimateGasDeposit(transaction: {
             token: Address;
             amount: BigNumberish;
@@ -64,7 +64,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             customBridgeData?: BytesLike;
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
-        }): Promise<any>;
+        }, nativeERC20?: Address): Promise<any>;
         getFullRequiredDepositFee(transaction: {
             token: Address;
             to?: Address;
