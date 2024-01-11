@@ -191,23 +191,20 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             nativeERC20?: Address,
         ): Promise<PriorityOpResponse> {
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
-
+            console.log(depositTx);
             if (transaction.token == ETH_ADDRESS || nativeERC20 == transaction.token) {
                 console.error("NATIVE ERC20 VERSION")
                 // Check allowance only if we are operating with a native ERC20
                 if (nativeERC20 == transaction.token) {
                     const bridgeAddress = (await this.getMainContract()).address;
-                    const allowance = await this.getAllowanceL1(nativeERC20, bridgeAddress);
-                    if (allowance.lte(transaction.amount)) {
-                        console.log(`ALLOWANCE ${allowance} IS LESS THAN AMOUNT ${transaction.amount}`)
-                        const approveTx = await this.approveERC20(nativeERC20, transaction.amount, {
+                    const allowance = BigNumber.from(await this.getAllowanceL1(nativeERC20, bridgeAddress));
+                    const needed_allowance = depositTx.overrides.value;
+                    if (allowance.lt(needed_allowance)) {
+                        const approveTx = await this.approveERC20(nativeERC20, needed_allowance, {
                             bridgeAddress,
                             ...transaction.approveOverrides,
                         });
                         await approveTx.wait();
-
-                    } else {
-                        console.log(`ALLOWANCE ${allowance} IS GREATER THAN AMOUNT ${transaction.amount}`)
                     }
                 }
 
