@@ -109,6 +109,23 @@ function AdapterL1(Base) {
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
             if (transaction.token == utils_1.ETH_ADDRESS || nativeERC20 == transaction.token) {
                 console.error("NATIVE ERC20 VERSION");
+                // Check allowance only if we are operating with a native ERC20
+                if (nativeERC20 == transaction.token) {
+                    const bridgeAddress = "0x7D257EbeCf08Aae4354a7C42ca5AECC0f10225Ec";
+                    const allowance = await this.getAllowanceL1(nativeERC20, bridgeAddress);
+                    if (allowance.lte(transaction.amount)) {
+                        const foo = BigInt(transaction.amount.toString());
+                        console.log(`ALLOWANCE ${allowance} IS LESS THAN AMOUNT ${transaction.amount}`);
+                        const approveTx = await this.approveERC20(nativeERC20, foo, {
+                            bridgeAddress,
+                            ...transaction.approveOverrides,
+                        });
+                        await approveTx.wait();
+                    }
+                    else {
+                        console.log(`ALLOWANCE ${allowance} IS GREATER THAN AMOUNT ${transaction.amount}`);
+                    }
+                }
                 const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
                 const gasLimit = (0, utils_1.scaleGasLimit)(baseGasLimit);
                 (_a = depositTx.overrides) !== null && _a !== void 0 ? _a : (depositTx.overrides = {});
