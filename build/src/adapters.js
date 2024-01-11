@@ -114,18 +114,13 @@ function AdapterL1(Base) {
                 if (nativeERC20 == transaction.token) {
                     const bridgeAddress = (await this.getMainContract()).address;
                     const allowance = ethers_1.BigNumber.from(await this.getAllowanceL1(nativeERC20, bridgeAddress));
-                    // const needed_allowance = BigNumber.from(transaction.amount).add(257833500000000);
                     const needed_allowance = depositTx.overrides.value;
-                    if (allowance <= needed_allowance) {
-                        console.log(`ALLOWANCE ${allowance} IS LESS THAN AMOUNT ${needed_allowance}`);
+                    if (allowance.lt(needed_allowance)) {
                         const approveTx = await this.approveERC20(nativeERC20, needed_allowance, {
                             bridgeAddress,
                             ...transaction.approveOverrides,
                         });
                         await approveTx.wait();
-                    }
-                    else {
-                        console.log(`ALLOWANCE ${allowance} IS GREATER THAN AMOUNT ${needed_allowance}Wei`);
                     }
                 }
                 const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
@@ -152,7 +147,6 @@ function AdapterL1(Base) {
                     // We only request the allowance if the current one is not enough.
                     const allowance = await this.getAllowanceL1(transaction.token, bridgeAddress);
                     if (allowance.lt(transaction.amount)) {
-                        console.log("ALLOWANCE IS LESS THAN AMOUNT");
                         const approveTx = await this.approveERC20(transaction.token, transaction.amount, {
                             bridgeAddress,
                             ...transaction.approveOverrides,
