@@ -111,12 +111,11 @@ function AdapterL1(Base) {
                 console.error("NATIVE ERC20 VERSION");
                 // Check allowance only if we are operating with a native ERC20
                 if (nativeERC20 == transaction.token) {
-                    const bridgeAddress = "0x7D257EbeCf08Aae4354a7C42ca5AECC0f10225Ec";
+                    const bridgeAddress = (await this.getMainContract()).address;
                     const allowance = await this.getAllowanceL1(nativeERC20, bridgeAddress);
                     if (allowance.lte(transaction.amount)) {
-                        const foo = BigInt(transaction.amount.toString());
                         console.log(`ALLOWANCE ${allowance} IS LESS THAN AMOUNT ${transaction.amount}`);
-                        const approveTx = await this.approveERC20(nativeERC20, foo, {
+                        const approveTx = await this.approveERC20(nativeERC20, transaction.amount, {
                             bridgeAddress,
                             ...transaction.approveOverrides,
                         });
