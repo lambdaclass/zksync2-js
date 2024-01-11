@@ -107,16 +107,15 @@ function AdapterL1(Base) {
             var _a, _b, _c;
             var _d;
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
-            console.log(depositTx);
             if (transaction.token == utils_1.ETH_ADDRESS || nativeERC20 == transaction.token) {
                 console.error("NATIVE ERC20 VERSION");
                 // Check allowance only if we are operating with a native ERC20
                 if (nativeERC20 == transaction.token) {
                     const bridgeAddress = (await this.getMainContract()).address;
-                    const allowance = ethers_1.BigNumber.from(await this.getAllowanceL1(nativeERC20, bridgeAddress));
-                    const needed_allowance = depositTx.overrides.value;
-                    if (allowance.lt(needed_allowance)) {
-                        const approveTx = await this.approveERC20(nativeERC20, needed_allowance, {
+                    const currentAllowance = ethers_1.BigNumber.from(await this.getAllowanceL1(nativeERC20, bridgeAddress));
+                    const neededAllowance = depositTx.overrides.value;
+                    if (currentAllowance.lt(neededAllowance)) {
+                        const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
                             bridgeAddress,
                             ...transaction.approveOverrides,
                         });
@@ -145,8 +144,8 @@ function AdapterL1(Base) {
                         ? transaction.bridgeAddress
                         : proposedBridge;
                     // We only request the allowance if the current one is not enough.
-                    const allowance = await this.getAllowanceL1(transaction.token, bridgeAddress);
-                    if (allowance.lt(transaction.amount)) {
+                    const currentAllowance = await this.getAllowanceL1(transaction.token, bridgeAddress);
+                    if (currentAllowance.lt(transaction.amount)) {
                         const approveTx = await this.approveERC20(transaction.token, transaction.amount, {
                             bridgeAddress,
                             ...transaction.approveOverrides,
