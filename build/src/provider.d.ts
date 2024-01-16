@@ -50,6 +50,7 @@ export declare class Provider extends ethers.providers.JsonRpcProvider {
     getTransactionDetails(txHash: BytesLike): Promise<TransactionDetails>;
     getBytecodeByHash(bytecodeHash: BytesLike): Promise<Uint8Array>;
     getRawBlockTransactions(number: number): Promise<RawBlockTransaction[]>;
+    getConversionRate(): Promise<BigNumber>;
     getWithdrawTx(transaction: {
         token: Address;
         amount: BigNumberish;

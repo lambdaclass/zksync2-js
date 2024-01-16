@@ -158,7 +158,7 @@ function AdapterL1(Base) {
             return (0, utils_1.scaleGasLimit)(baseGasLimit);
         }
         async getDepositTx(transaction, nativeERC20) {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
             const bridgeContracts = await this.getL1BridgeContracts();
             if (transaction.bridgeAddress != null) {
                 bridgeContracts.erc20 = bridgeContracts.erc20.attach(transaction.bridgeAddress);
@@ -185,7 +185,12 @@ function AdapterL1(Base) {
             const zksyncContract = await this.getMainContract();
             const baseCost = await zksyncContract.l2TransactionBaseCost(await gasPriceForEstimation, tx.l2GasLimit, tx.gasPerPubdataByte);
             if (token == utils_1.ETH_ADDRESS || nativeERC20 == token) {
-                (_h = overrides.value) !== null && _h !== void 0 ? _h : (overrides.value = baseCost.add(operatorTip).add(amount));
+                if (token == utils_1.ETH_ADDRESS) {
+                    (_h = overrides.value) !== null && _h !== void 0 ? _h : (overrides.value = baseCost.add(operatorTip).add(amount));
+                }
+                else {
+                    (_j = overrides.value) !== null && _j !== void 0 ? _j : (overrides.value = baseCost.add(operatorTip));
+                }
                 return {
                     contractAddress: to,
                     calldata: "0x",
@@ -197,7 +202,7 @@ function AdapterL1(Base) {
                 };
             }
             else {
-                let refundRecipient = (_j = tx.refundRecipient) !== null && _j !== void 0 ? _j : ethers_1.ethers.constants.AddressZero;
+                let refundRecipient = (_k = tx.refundRecipient) !== null && _k !== void 0 ? _k : ethers_1.ethers.constants.AddressZero;
                 const args = [
                     to,
                     token,
@@ -206,7 +211,7 @@ function AdapterL1(Base) {
                     tx.gasPerPubdataByte,
                     refundRecipient,
                 ];
-                (_k = overrides.value) !== null && _k !== void 0 ? _k : (overrides.value = baseCost.add(operatorTip));
+                (_l = overrides.value) !== null && _l !== void 0 ? _l : (overrides.value = baseCost.add(operatorTip));
                 await (0, utils_1.checkBaseCost)(baseCost, overrides.value);
                 let l2WethToken = ethers_1.ethers.constants.AddressZero;
                 try {
@@ -395,7 +400,7 @@ function AdapterL1(Base) {
             return this._providerL1().estimateGas(requestExecuteTx);
         }
         async getRequestExecuteTx(transaction) {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
+            var _a, _b, _c, _d, _e, _f, _g;
             const zksyncContract = await this.getMainContract();
             const { ...tx } = transaction;
             (_a = tx.l2Value) !== null && _a !== void 0 ? _a : (tx.l2Value = ethers_1.BigNumber.from(0));
@@ -408,13 +413,16 @@ function AdapterL1(Base) {
             const { contractAddress, l2Value, calldata, l2GasLimit, factoryDeps, operatorTip, overrides, gasPerPubdataByte, refundRecipient, } = tx;
             await insertGasPrice(this._providerL1(), overrides);
             const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
-            const baseCost = await this.getBaseCost({
+            // This base cost has to be priced in the ERC20 token because it will be paid on L2.
+            let baseCost = await this.getBaseCost({
                 gasPrice: await gasPriceForEstimation,
                 gasPerPubdataByte,
                 gasLimit: l2GasLimit,
             });
-            (_h = overrides.value) !== null && _h !== void 0 ? _h : (overrides.value = baseCost.add(operatorTip).add(l2Value));
-            await (0, utils_1.checkBaseCost)(baseCost, overrides.value);
+            const conversionRate = await this._providerL2().getConversionRate();
+            baseCost = baseCost.mul(conversionRate);
+            overrides.value = 0;
+            await (0, utils_1.checkBaseCost)(baseCost, l2Value);
             return await zksyncContract.populateTransaction.requestL2Transaction(contractAddress, l2Value, baseCost.add(operatorTip).add(l2Value), calldata, l2GasLimit, utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT, factoryDeps, refundRecipient, overrides);
         }
     };
