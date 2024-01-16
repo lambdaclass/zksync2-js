@@ -191,9 +191,22 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             nativeERC20?: Address,
         ): Promise<PriorityOpResponse> {
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
-
             if (transaction.token == ETH_ADDRESS || nativeERC20 == transaction.token) {
                 console.error("NATIVE ERC20 VERSION")
+                // Check allowance only if we are operating with a native ERC20
+                if (nativeERC20 == transaction.token) {
+                    const bridgeAddress = (await this.getMainContract()).address;
+                    const currentAllowance = BigNumber.from(await this.getAllowanceL1(nativeERC20, bridgeAddress));
+                    const neededAllowance = depositTx.overrides.value;
+                    if (currentAllowance.lt(neededAllowance)) {
+                        const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
+                            bridgeAddress,
+                            ...transaction.approveOverrides,
+                        });
+                        await approveTx.wait();
+                    }
+                }
+
                 const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
                 const gasLimit = scaleGasLimit(baseGasLimit);
 
@@ -218,8 +231,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                         : proposedBridge;
 
                     // We only request the allowance if the current one is not enough.
-                    const allowance = await this.getAllowanceL1(transaction.token, bridgeAddress);
-                    if (allowance.lt(transaction.amount)) {
+                    const currentAllowance = await this.getAllowanceL1(transaction.token, bridgeAddress);
+                    if (currentAllowance.lt(transaction.amount)) {
                         const approveTx = await this.approveERC20(
                             transaction.token,
                             transaction.amount,
