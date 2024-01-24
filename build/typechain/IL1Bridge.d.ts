@@ -24,7 +24,7 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 interface Il1BridgeInterface extends ethers.utils.Interface {
   functions: {
     "claimFailedDeposit(address,address,bytes32,uint256,uint256,uint16,bytes32[])": FunctionFragment;
-    "deposit(address,address,uint256,uint256,uint256,address)": FunctionFragment;
+    "deposit(address,address,uint256,uint256,uint256,address,uint256)": FunctionFragment;
     "finalizeWithdrawal(uint256,uint256,uint16,bytes,bytes32[])": FunctionFragment;
     "isWithdrawalFinalized(uint256,uint256)": FunctionFragment;
     "l2Bridge()": FunctionFragment;
@@ -45,7 +45,7 @@ interface Il1BridgeInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "deposit",
-    values: [string, string, BigNumberish, BigNumberish, BigNumberish, string]
+    values: [string, string, BigNumberish, BigNumberish, BigNumberish, string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "finalizeWithdrawal",
@@ -134,16 +134,18 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
+      _l2MaxFee: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    "deposit(address,address,uint256,uint256,uint256,address)"(
+    "deposit(address,address,uint256,uint256,uint256,address,uint256)"(
       _l2Receiver: string,
       _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
+      _l2MaxFee: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
@@ -233,16 +235,18 @@ export class IL1Bridge extends Contract {
     _l2TxGasLimit: BigNumberish,
     _l2TxGasPerPubdataByte: BigNumberish,
     _refundRecipient: string,
+    _l2MaxFee: BigNumberish,
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  "deposit(address,address,uint256,uint256,uint256,address)"(
+  "deposit(address,address,uint256,uint256,uint256,address,uint256)"(
     _l2Receiver: string,
     _l1Token: string,
     _amount: BigNumberish,
     _l2TxGasLimit: BigNumberish,
     _l2TxGasPerPubdataByte: BigNumberish,
     _refundRecipient: string,
+    _l2MaxFee: BigNumberish,
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
@@ -317,16 +321,18 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
+      _l2MaxFee: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    "deposit(address,address,uint256,uint256,uint256,address)"(
+    "deposit(address,address,uint256,uint256,uint256,address,uint256)"(
       _l2Receiver: string,
       _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
+      _l2MaxFee: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -427,16 +433,18 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
+      _l2MaxFee: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    "deposit(address,address,uint256,uint256,uint256,address)"(
+    "deposit(address,address,uint256,uint256,uint256,address,uint256)"(
       _l2Receiver: string,
       _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
+      _l2MaxFee: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
@@ -515,16 +523,18 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
+      _l2MaxFee: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    "deposit(address,address,uint256,uint256,uint256,address)"(
+    "deposit(address,address,uint256,uint256,uint256,address,uint256)"(
       _l2Receiver: string,
       _l1Token: string,
       _amount: BigNumberish,
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
+      _l2MaxFee: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 

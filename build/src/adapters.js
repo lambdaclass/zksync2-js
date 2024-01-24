@@ -106,9 +106,10 @@ function AdapterL1(Base) {
         async deposit(transaction, nativeERC20) {
             var _a, _b, _c;
             var _d;
+            console.log('transaction');
+            console.log(transaction);
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
             if (transaction.token == utils_1.ETH_ADDRESS || nativeERC20 == transaction.token) {
-                console.error("NATIVE ERC20 VERSION");
                 // Check allowance only if we are operating with a native ERC20
                 if (nativeERC20 == transaction.token) {
                     const bridgeAddress = (await this.getMainContract()).address;
@@ -129,6 +130,7 @@ function AdapterL1(Base) {
                 return this.requestExecute(depositTx);
             }
             else {
+                console.log('NON NATIVE TOKEN');
                 const bridgeContracts = await this.getL1BridgeContracts();
                 if (transaction.approveERC20) {
                     let l2WethToken = ethers_1.ethers.constants.AddressZero;
@@ -153,10 +155,18 @@ function AdapterL1(Base) {
                         await approveTx.wait();
                     }
                 }
-                const baseGasLimit = await this._providerL1().estimateGas(depositTx);
+                console.log('DEPOSIT TX BEFORE ESTIMATE GAS');
+                console.log(depositTx);
+                // const baseGasLimit = await this._providerL1().estimateGas(depositTx);
+                const baseGasLimit = ethers_1.BigNumber.from(1000000);
                 const gasLimit = (0, utils_1.scaleGasLimit)(baseGasLimit);
                 (_c = depositTx.gasLimit) !== null && _c !== void 0 ? _c : (depositTx.gasLimit = gasLimit);
-                return await this._providerL2().getPriorityOpResponse(await this._signerL1().sendTransaction(depositTx));
+                console.log(depositTx);
+                const txSended = await this._signerL1().sendTransaction(depositTx);
+                console.log(txSended);
+                const getPrioOrRes = await this._providerL2().getPriorityOpResponse(txSended);
+                console.log(getPrioOrRes);
+                return getPrioOrRes;
             }
         }
         async estimateGasDeposit(transaction) {
@@ -223,6 +233,7 @@ function AdapterL1(Base) {
                     tx.l2GasLimit,
                     tx.gasPerPubdataByte,
                     refundRecipient,
+                    99999999999999 // remove this hardcode
                 ];
                 (_l = overrides.value) !== null && _l !== void 0 ? _l : (overrides.value = baseCost.add(operatorTip));
                 await (0, utils_1.checkBaseCost)(baseCost, overrides.value);

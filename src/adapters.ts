@@ -190,9 +190,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             },
             nativeERC20?: Address,
         ): Promise<PriorityOpResponse> {
+            console.log('transaction');
+            console.log(transaction);
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
             if (transaction.token == ETH_ADDRESS || nativeERC20 == transaction.token) {
-                console.error("NATIVE ERC20 VERSION")
                 // Check allowance only if we are operating with a native ERC20
                 if (nativeERC20 == transaction.token) {
                     const bridgeAddress = (await this.getMainContract()).address;
@@ -215,6 +216,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
                 return this.requestExecute(depositTx);
             } else {
+                console.log('NON NATIVE TOKEN')
                 const bridgeContracts = await this.getL1BridgeContracts();
                 if (transaction.approveERC20) {
                     let l2WethToken = ethers.constants.AddressZero;
@@ -244,15 +246,19 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                         await approveTx.wait();
                     }
                 }
-
-                const baseGasLimit = await this._providerL1().estimateGas(depositTx);
+                console.log('DEPOSIT TX BEFORE ESTIMATE GAS');
+                console.log(depositTx);
+                // const baseGasLimit = await this._providerL1().estimateGas(depositTx);
+                const baseGasLimit = BigNumber.from(1000000);
                 const gasLimit = scaleGasLimit(baseGasLimit);
 
                 depositTx.gasLimit ??= gasLimit;
-
-                return await this._providerL2().getPriorityOpResponse(
-                    await this._signerL1().sendTransaction(depositTx),
-                );
+                console.log(depositTx)
+                const txSended =  await this._signerL1().sendTransaction(depositTx);
+                console.log(txSended);
+                const getPrioOrRes = await this._providerL2().getPriorityOpResponse(txSended);
+                console.log(getPrioOrRes);
+                return getPrioOrRes;
             }
         }
 
@@ -365,13 +371,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 };
             } else {
                 let refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
-                const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address] = [
+                const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address, BigNumberish] = [
                     to,
                     token,
                     amount,
                     tx.l2GasLimit,
                     tx.gasPerPubdataByte,
                     refundRecipient,
+                    99999999999999 // remove this hardcode
                 ];
 
                 overrides.value ??= baseCost.add(operatorTip);
