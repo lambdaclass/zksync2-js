@@ -218,6 +218,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             } else {
                 console.log('NON NATIVE TOKEN')
                 const bridgeContracts = await this.getL1BridgeContracts();
+                console.log('BRIDGE CONTRACTS');
+                console.log(bridgeContracts);
                 if (transaction.approveERC20) {
                     let l2WethToken = ethers.constants.AddressZero;
                     try {
@@ -234,6 +236,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
                     // We only request the allowance if the current one is not enough.
                     const currentAllowance = await this.getAllowanceL1(transaction.token, bridgeAddress);
+                    console.log('CURRENT ALLOWANCE');
+                    console.log(currentAllowance);
                     if (currentAllowance.lt(transaction.amount)) {
                         const approveTx = await this.approveERC20(
                             transaction.token,
@@ -244,12 +248,14 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                             },
                         );
                         await approveTx.wait();
+                        console.log('APPROVE TX');
+                        console.log(approveTx);
                     }
                 }
                 console.log('DEPOSIT TX BEFORE ESTIMATE GAS');
                 console.log(depositTx);
-                // const baseGasLimit = await this._providerL1().estimateGas(depositTx);
-                const baseGasLimit = BigNumber.from(1000000);
+                const baseGasLimit = await this._providerL1().estimateGas(depositTx);
+                // const baseGasLimit = BigNumber.from(5_000_000);
                 const gasLimit = scaleGasLimit(baseGasLimit);
 
                 depositTx.gasLimit ??= gasLimit;
@@ -378,7 +384,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     tx.l2GasLimit,
                     tx.gasPerPubdataByte,
                     refundRecipient,
-                    99999999999999 // remove this hardcode
+                    999999999999999 // remove this hardcode
                 ];
 
                 overrides.value ??= baseCost.add(operatorTip);
