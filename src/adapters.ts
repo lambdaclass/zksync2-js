@@ -192,7 +192,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         ): Promise<PriorityOpResponse> {
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
             if (transaction.token == ETH_ADDRESS || nativeERC20 == transaction.token) {
-                console.error("NATIVE ERC20 VERSION")
+                console.log("NATIVE ERC20 VERSION")
                 // Check allowance only if we are operating with a native ERC20
                 if (nativeERC20 == transaction.token) {
                     const bridgeAddress = (await this.getMainContract()).address;
@@ -213,7 +213,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 depositTx.overrides ??= {};
                 depositTx.overrides.gasLimit ??= gasLimit;
 
-                return this.requestExecute(depositTx);
+                return this.requestExecute(depositTx, nativeERC20 == transaction.token);
             } else {
                 const bridgeContracts = await this.getL1BridgeContracts();
                 if (transaction.approveERC20) {
@@ -676,8 +676,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             gasPerPubdataByte?: BigNumberish;
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
-        }): Promise<PriorityOpResponse> {
-            const requestExecuteTx = await this.getRequestExecuteTx(transaction);
+        }, nativeERC20?: boolean): Promise<PriorityOpResponse> {
+            const requestExecuteTx = await this.getRequestExecuteTx(transaction, nativeERC20);
             return this._providerL2().getPriorityOpResponse(
                 await this._signerL1().sendTransaction(requestExecuteTx),
             );
@@ -693,8 +693,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             gasPerPubdataByte?: BigNumberish;
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
-        }): Promise<ethers.BigNumber> {
-            const requestExecuteTx = await this.getRequestExecuteTx(transaction);
+        }, nativeERC20?: boolean): Promise<ethers.BigNumber> {
+            const requestExecuteTx = await this.getRequestExecuteTx(transaction, nativeERC20);
 
             delete requestExecuteTx.gasPrice;
             delete requestExecuteTx.maxFeePerGas;
@@ -713,7 +713,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             gasPerPubdataByte?: BigNumberish;
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
-        }): Promise<ethers.PopulatedTransaction> {
+        }, nativeERC20?: boolean): Promise<ethers.PopulatedTransaction> {
             const zksyncContract = await this.getMainContract();
 
             const { ...tx } = transaction;
@@ -747,10 +747,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 gasLimit: l2GasLimit,
             });
 
-            const conversionRate = await this._providerL2().getConversionRate();
-            baseCost = baseCost.mul(conversionRate);
+            if (nativeERC20){
+                const conversionRate = await this._providerL2().getConversionRate();
+                baseCost = baseCost.mul(conversionRate);
 
-            overrides.value = 0;
+                overrides.value = 0;
+            }
 
             await checkBaseCost(baseCost, l2Value);
 

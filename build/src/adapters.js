@@ -108,7 +108,7 @@ function AdapterL1(Base) {
             var _d;
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
             if (transaction.token == utils_1.ETH_ADDRESS || nativeERC20 == transaction.token) {
-                console.error("NATIVE ERC20 VERSION");
+                console.log("NATIVE ERC20 VERSION");
                 // Check allowance only if we are operating with a native ERC20
                 if (nativeERC20 == transaction.token) {
                     const bridgeAddress = (await this.getMainContract()).address;
@@ -126,7 +126,7 @@ function AdapterL1(Base) {
                 const gasLimit = (0, utils_1.scaleGasLimit)(baseGasLimit);
                 (_a = depositTx.overrides) !== null && _a !== void 0 ? _a : (depositTx.overrides = {});
                 (_b = (_d = depositTx.overrides).gasLimit) !== null && _b !== void 0 ? _b : (_d.gasLimit = gasLimit);
-                return this.requestExecute(depositTx);
+                return this.requestExecute(depositTx, nativeERC20 == transaction.token);
             }
             else {
                 const bridgeContracts = await this.getL1BridgeContracts();
@@ -401,18 +401,18 @@ function AdapterL1(Base) {
             const proof = await this._providerL2().getLogProof(depositHash, successL2ToL1LogIndex);
             return await l1Bridge.claimFailedDeposit(calldata["_l1Sender"], calldata["_l1Token"], depositHash, receipt.l1BatchNumber, proof.id, receipt.l1BatchTxIndex, proof.proof, overrides !== null && overrides !== void 0 ? overrides : {});
         }
-        async requestExecute(transaction) {
-            const requestExecuteTx = await this.getRequestExecuteTx(transaction);
+        async requestExecute(transaction, nativeERC20) {
+            const requestExecuteTx = await this.getRequestExecuteTx(transaction, nativeERC20);
             return this._providerL2().getPriorityOpResponse(await this._signerL1().sendTransaction(requestExecuteTx));
         }
-        async estimateGasRequestExecute(transaction) {
-            const requestExecuteTx = await this.getRequestExecuteTx(transaction);
+        async estimateGasRequestExecute(transaction, nativeERC20) {
+            const requestExecuteTx = await this.getRequestExecuteTx(transaction, nativeERC20);
             delete requestExecuteTx.gasPrice;
             delete requestExecuteTx.maxFeePerGas;
             delete requestExecuteTx.maxPriorityFeePerGas;
             return this._providerL1().estimateGas(requestExecuteTx);
         }
-        async getRequestExecuteTx(transaction) {
+        async getRequestExecuteTx(transaction, nativeERC20) {
             var _a, _b, _c, _d, _e, _f, _g;
             const zksyncContract = await this.getMainContract();
             const { ...tx } = transaction;
@@ -432,9 +432,11 @@ function AdapterL1(Base) {
                 gasPerPubdataByte,
                 gasLimit: l2GasLimit,
             });
-            const conversionRate = await this._providerL2().getConversionRate();
-            baseCost = baseCost.mul(conversionRate);
-            overrides.value = 0;
+            if (nativeERC20) {
+                const conversionRate = await this._providerL2().getConversionRate();
+                baseCost = baseCost.mul(conversionRate);
+                overrides.value = 0;
+            }
             await (0, utils_1.checkBaseCost)(baseCost, l2Value);
             return await zksyncContract.populateTransaction.requestL2Transaction(contractAddress, l2Value, baseCost.add(operatorTip).add(l2Value), calldata, l2GasLimit, utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT, factoryDeps, refundRecipient, overrides);
         }

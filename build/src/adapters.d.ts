@@ -102,7 +102,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             gasPerPubdataByte?: BigNumberish;
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
-        }): Promise<PriorityOpResponse>;
+        }, nativeERC20?: boolean): Promise<PriorityOpResponse>;
         estimateGasRequestExecute(transaction: {
             contractAddress: Address;
             calldata: BytesLike;
@@ -113,7 +113,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             gasPerPubdataByte?: BigNumberish;
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
-        }): Promise<ethers.BigNumber>;
+        }, nativeERC20?: boolean): Promise<ethers.BigNumber>;
         getRequestExecuteTx(transaction: {
             contractAddress: Address;
             calldata: BytesLike;
@@ -124,7 +124,7 @@ export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBa
             gasPerPubdataByte?: BigNumberish;
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
-        }): Promise<ethers.PopulatedTransaction>;
+        }, nativeERC20?: boolean): Promise<ethers.PopulatedTransaction>;
         sendTransaction(tx: ethers.providers.TransactionRequest): Promise<ethers.providers.TransactionResponse>;
         getAddress(): Promise<string>;
     };
