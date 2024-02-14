@@ -127,7 +127,7 @@ declare const Wallet_base: {
             gasPerPubdataByte?: ethers.BigNumberish;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }): Promise<import("./types").PriorityOpResponse>;
+        }, nativeERC20?: boolean): Promise<import("./types").PriorityOpResponse>;
         estimateGasRequestExecute(transaction: {
             contractAddress: string;
             calldata: ethers.utils.BytesLike;
@@ -138,7 +138,7 @@ declare const Wallet_base: {
             gasPerPubdataByte?: ethers.BigNumberish;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }): Promise<ethers.BigNumber>;
+        }, nativeERC20?: boolean): Promise<ethers.BigNumber>;
         getRequestExecuteTx(transaction: {
             contractAddress: string;
             calldata: ethers.utils.BytesLike;
@@ -149,7 +149,7 @@ declare const Wallet_base: {
             gasPerPubdataByte?: ethers.BigNumberish;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }): Promise<ethers.PopulatedTransaction>;
+        }, nativeERC20?: boolean): Promise<ethers.PopulatedTransaction>;
         sendTransaction(tx: ethers.providers.TransactionRequest): Promise<ethers.providers.TransactionResponse>;
         getAddress(): Promise<string>;
     };
