@@ -174,6 +174,11 @@ const _abi = [
                 name: "_refundRecipient",
                 type: "address",
             },
+            {
+                internalType: "uint256",
+                name: "_l2MaxFee",
+                type: "uint256",
+            },
         ],
         name: "deposit",
         outputs: [
