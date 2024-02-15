@@ -440,7 +440,9 @@ function AdapterL1(Base) {
                 baseCost = baseCost.mul(conversionRate);
                 overrides.value = 0;
             }
-            await (0, utils_1.checkBaseCost)(baseCost, l2Value);
+            else {
+                await (0, utils_1.checkBaseCost)(baseCost, overrides.value);
+            }
             return await zksyncContract.populateTransaction.requestL2Transaction(contractAddress, l2Value, baseCost.add(operatorTip).add(l2Value), calldata, l2GasLimit, utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT, factoryDeps, refundRecipient, overrides);
         }
     };

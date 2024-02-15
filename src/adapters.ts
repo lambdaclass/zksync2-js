@@ -751,9 +751,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 baseCost = baseCost.mul(conversionRate);
 
                 overrides.value = 0;
+            } else {
+                await checkBaseCost(baseCost, overrides.value);
             }
 
-            await checkBaseCost(baseCost, l2Value);
 
             return await zksyncContract.populateTransaction.requestL2Transaction(
                 contractAddress,
