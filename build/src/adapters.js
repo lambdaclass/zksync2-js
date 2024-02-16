@@ -113,18 +113,18 @@ function AdapterL1(Base) {
                     const bridgeAddress = (await this.getMainContract()).address;
                     const currentAllowance = ethers_1.BigNumber.from(await this.getAllowanceL1(nativeERC20, bridgeAddress));
                     const overrides = transaction.overrides;
-                    await insertGasPrice(this._providerL1(), overrides);
-                    const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
-                    const l2GasLimit = await this._providerL2().estimateL1ToL2Execute(depositTx);
-                    const gasPerPubdataByte = utils_1.REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
-                    // This base cost has to be priced in the ERC20 token because it will be paid on L2.
-                    let baseCost = await this.getBaseCost({
-                        gasPrice: await gasPriceForEstimation,
-                        gasPerPubdataByte,
-                        gasLimit: l2GasLimit,
-                    });
-                    const conversionRate = await this._providerL2().getConversionRate();
-                    baseCost = baseCost.mul(conversionRate);
+                    // await insertGasPrice(this._providerL1(), overrides);
+                    // const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
+                    // const l2GasLimit = await this._providerL2().estimateL1ToL2Execute(depositTx);
+                    // const gasPerPubdataByte = REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+                    // // This base cost has to be priced in the ERC20 token because it will be paid on L2.
+                    // let baseCost = await this.getBaseCost({
+                    //     gasPrice: await gasPriceForEstimation,
+                    //     gasPerPubdataByte,
+                    //     gasLimit: l2GasLimit,
+                    // });
+                    // const conversionRate = await this._providerL2().getConversionRate();
+                    // baseCost = baseCost.mul(conversionRate);
                     const operatorTip = depositTx.operatorTip;
                     // const neededAllowance = baseCost.add(depositTx.l2Value).add(operatorTip);
                     const neededAllowance = depositTx.overrides.value;
