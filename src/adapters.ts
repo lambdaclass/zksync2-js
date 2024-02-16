@@ -196,17 +196,46 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 if (nativeERC20 == transaction.token) {
                     const bridgeAddress = (await this.getMainContract()).address;
                     const currentAllowance = BigNumber.from(await this.getAllowanceL1(nativeERC20, bridgeAddress));
+
+                    const overrides = transaction.overrides;
+
+                    await insertGasPrice(this._providerL1(), overrides);
+                    const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
+
+                    const l2GasLimit = await this._providerL2().estimateL1ToL2Execute(depositTx);
+                    const gasPerPubdataByte = REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+
+
+                    // This base cost has to be priced in the ERC20 token because it will be paid on L2.
+                    let baseCost = await this.getBaseCost({
+                        gasPrice: await gasPriceForEstimation,
+                        gasPerPubdataByte,
+                        gasLimit: l2GasLimit,
+                    });
+
+                    const conversionRate = await this._providerL2().getConversionRate();
+                    baseCost = baseCost.mul(conversionRate);
+
+                    const operatorTip = depositTx.operatorTip;
+
+                    // const neededAllowance = baseCost.add(depositTx.l2Value).add(operatorTip);
+
                     const neededAllowance = depositTx.overrides.value;
-                    if (currentAllowance.lt(neededAllowance)) {
-                        const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
-                            bridgeAddress,
-                            ...transaction.approveOverrides,
-                        });
+                    // if (currentAllowance.lt(neededAllowance)) {
+                    const approveTx = await this.approveERC20(nativeERC20, BigNumber.from("0xfffffffffffffffffffffffffffffffff"), {
+                        bridgeAddress,
+                        ...transaction.approveOverrides,
+                    });
+
+                    // const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
+                    //     bridgeAddress,
+                    //     ...transaction.approveOverrides,
+                    // });
                         await approveTx.wait();
-                    }
+                    // }
                 }
 
-                const baseGasLimit = await this.estimateGasRequestExecute(depositTx);
+                const baseGasLimit = await this.estimateGasRequestExecute(depositTx, nativeERC20 == transaction.token);
                 const gasLimit = scaleGasLimit(baseGasLimit);
 
                 depositTx.overrides ??= {};
@@ -244,7 +273,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     }
                 }
                 const baseGasLimit = await this._providerL1().estimateGas(depositTx);
-                // const baseGasLimit = BigNumber.from(5_000_000);
                 const gasLimit = scaleGasLimit(baseGasLimit);
 
                 depositTx.gasLimit ??= gasLimit;
@@ -363,6 +391,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 };
             } else {
                 let refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
+                // l2MaxFee needs to be zero if the native token is eth, otherwise should be a good value
                 const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address, BigNumberish] = [
                     to,
                     token,
@@ -370,7 +399,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     tx.l2GasLimit,
                     tx.gasPerPubdataByte,
                     refundRecipient,
-                    999999999999999 // remove this hardcode
+                    (nativeERC20) ? 999999999999999 : 0 // remove this hardcode
                 ];
 
                 overrides.value ??= baseCost.add(operatorTip);
@@ -755,11 +784,12 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 await checkBaseCost(baseCost, overrides.value);
             }
 
+            let amount = nativeERC20 ? baseCost.add(operatorTip).add(l2Value) : 0;
 
             return await zksyncContract.populateTransaction.requestL2Transaction(
                 contractAddress,
                 l2Value,
-                baseCost.add(operatorTip).add(l2Value),
+                amount,
                 calldata,
                 l2GasLimit,
                 REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
