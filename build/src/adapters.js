@@ -108,7 +108,6 @@ function AdapterL1(Base) {
             var _d;
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
             if (transaction.token == utils_1.ETH_ADDRESS || nativeERC20 == transaction.token) {
-                console.error("NATIVE ERC20 VERSION");
                 // Check allowance only if we are operating with a native ERC20
                 if (nativeERC20 == transaction.token) {
                     const bridgeAddress = (await this.getMainContract()).address;
