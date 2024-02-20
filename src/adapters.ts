@@ -378,7 +378,9 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 if(token == ETH_ADDRESS) {
                     overrides.value ??= baseCost.add(operatorTip).add(amount);
                 } else {
-                    overrides.value ??= baseCost.add(operatorTip);
+                    // now the native token case should send zero in the msg.value
+                    // overrides.value ??= baseCost.add(operatorTip);
+                    overrides.value = 0;
                 }
                 return {
                     contractAddress: to,
@@ -391,6 +393,16 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 };
             } else {
                 let refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
+
+                const cost = baseCost.add(operatorTip);
+                // overrides.value ??= baseCost.add(operatorTip);
+                await checkBaseCost(baseCost, cost);
+                if (!nativeERC20) { 
+                    overrides.value = cost;
+                } else {
+                    overrides.value = 0;
+                }
+
                 // l2MaxFee needs to be zero if the native token is eth, otherwise should be a good value
                 const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address, BigNumberish] = [
                     to,
@@ -399,11 +411,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     tx.l2GasLimit,
                     tx.gasPerPubdataByte,
                     refundRecipient,
-                    (nativeERC20) ? 999999999999999 : 0 // remove this hardcode
+                    (nativeERC20) ? cost : 0 // remove this hardcode
                 ];
-
-                overrides.value ??= baseCost.add(operatorTip);
-                await checkBaseCost(baseCost, overrides.value);
 
                 let l2WethToken = ethers.constants.AddressZero;
                 try {

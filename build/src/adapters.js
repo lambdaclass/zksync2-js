@@ -191,7 +191,7 @@ function AdapterL1(Base) {
             return (0, utils_1.scaleGasLimit)(baseGasLimit);
         }
         async getDepositTx(transaction, nativeERC20) {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j;
             const bridgeContracts = await this.getL1BridgeContracts();
             if (transaction.bridgeAddress != null) {
                 bridgeContracts.erc20 = bridgeContracts.erc20.attach(transaction.bridgeAddress);
@@ -222,7 +222,9 @@ function AdapterL1(Base) {
                     (_h = overrides.value) !== null && _h !== void 0 ? _h : (overrides.value = baseCost.add(operatorTip).add(amount));
                 }
                 else {
-                    (_j = overrides.value) !== null && _j !== void 0 ? _j : (overrides.value = baseCost.add(operatorTip));
+                    // now the native token case should send zero in the msg.value
+                    // overrides.value ??= baseCost.add(operatorTip);
+                    overrides.value = 0;
                 }
                 return {
                     contractAddress: to,
@@ -235,7 +237,16 @@ function AdapterL1(Base) {
                 };
             }
             else {
-                let refundRecipient = (_k = tx.refundRecipient) !== null && _k !== void 0 ? _k : ethers_1.ethers.constants.AddressZero;
+                let refundRecipient = (_j = tx.refundRecipient) !== null && _j !== void 0 ? _j : ethers_1.ethers.constants.AddressZero;
+                const cost = baseCost.add(operatorTip);
+                // overrides.value ??= baseCost.add(operatorTip);
+                await (0, utils_1.checkBaseCost)(baseCost, cost);
+                if (!nativeERC20) {
+                    overrides.value = cost;
+                }
+                else {
+                    overrides.value = 0;
+                }
                 // l2MaxFee needs to be zero if the native token is eth, otherwise should be a good value
                 const args = [
                     to,
@@ -244,10 +255,8 @@ function AdapterL1(Base) {
                     tx.l2GasLimit,
                     tx.gasPerPubdataByte,
                     refundRecipient,
-                    (nativeERC20) ? 999999999999999 : 0 // remove this hardcode
+                    (nativeERC20) ? cost : 0 // remove this hardcode
                 ];
-                (_l = overrides.value) !== null && _l !== void 0 ? _l : (overrides.value = baseCost.add(operatorTip));
-                await (0, utils_1.checkBaseCost)(baseCost, overrides.value);
                 let l2WethToken = ethers_1.ethers.constants.AddressZero;
                 try {
                     l2WethToken = await bridgeContracts.weth.l2TokenAddress(tx.token);
