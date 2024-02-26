@@ -199,40 +199,39 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
                     const overrides = transaction.overrides;
 
-                    // await insertGasPrice(this._providerL1(), overrides);
-                    // const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
+                    await insertGasPrice(this._providerL1(), overrides);
+                    const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
 
-                    // const l2GasLimit = await this._providerL2().estimateL1ToL2Execute(depositTx);
-                    // const gasPerPubdataByte = REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
+                    const l2GasLimit = await this._providerL2().estimateL1ToL2Execute(depositTx);
+                    const gasPerPubdataByte = REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT;
 
 
                     // // This base cost has to be priced in the ERC20 token because it will be paid on L2.
-                    // let baseCost = await this.getBaseCost({
-                    //     gasPrice: await gasPriceForEstimation,
-                    //     gasPerPubdataByte,
-                    //     gasLimit: l2GasLimit,
-                    // });
+                    let baseCost = await this.getBaseCost({
+                        gasPrice: await gasPriceForEstimation,
+                        gasPerPubdataByte,
+                        gasLimit: l2GasLimit,
+                    });
 
-                    // const conversionRate = await this._providerL2().getConversionRate();
-                    // baseCost = baseCost.mul(conversionRate);
+                    const conversionRate = await this._providerL2().getConversionRate();
+                    baseCost = baseCost.mul(conversionRate);
 
                     const operatorTip = depositTx.operatorTip;
 
-                    // const neededAllowance = baseCost.add(depositTx.l2Value).add(operatorTip);
+                    const neededAllowance = baseCost.add(depositTx.l2Value).add(operatorTip);
 
-                    const neededAllowance = depositTx.overrides.value;
-                    if (currentAllowance.lt(neededAllowance)) {
-                    const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
-                        bridgeAddress,
-                        ...transaction.approveOverrides,
-                    });
-
+                    // const neededAllowance = depositTx.overrides.value;
+                    // if (currentAllowance.lt(neededAllowance)) {
                     // const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
                     //     bridgeAddress,
                     //     ...transaction.approveOverrides,
                     // });
-                        await approveTx.wait();
-                    }
+
+                    const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
+                        bridgeAddress,
+                        ...transaction.approveOverrides,
+                    });
+                    await approveTx.wait();
                 }
 
                 const baseGasLimit = await this.estimateGasRequestExecute(depositTx, nativeERC20 == transaction.token);
