@@ -127,17 +127,13 @@ function AdapterL1(Base) {
                     baseCost = baseCost.mul(conversionRate);
                     const operatorTip = depositTx.operatorTip;
                     const neededAllowance = baseCost.add(depositTx.l2Value).add(operatorTip);
-                    // const neededAllowance = depositTx.overrides.value;
-                    // if (currentAllowance.lt(neededAllowance)) {
-                    // const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
-                    //     bridgeAddress,
-                    //     ...transaction.approveOverrides,
-                    // });
-                    const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
-                        bridgeAddress,
-                        ...transaction.approveOverrides,
-                    });
-                    await approveTx.wait();
+                    if (currentAllowance.lt(neededAllowance)) {
+                        const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
+                            bridgeAddress,
+                            ...transaction.approveOverrides,
+                        });
+                        await approveTx.wait();
+                    }
                 }
                 const baseGasLimit = await this.estimateGasRequestExecute(depositTx, nativeERC20 == transaction.token);
                 const gasLimit = (0, utils_1.scaleGasLimit)(baseGasLimit);
@@ -456,7 +452,7 @@ function AdapterL1(Base) {
             if (nativeERC20) {
                 const conversionRate = await this._providerL2().getConversionRate();
                 baseCost = baseCost.mul(conversionRate);
-                overrides.value = 0;
+                // overrides.value = 0;
             }
             else {
                 await (0, utils_1.checkBaseCost)(baseCost, overrides.value);
