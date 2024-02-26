@@ -221,8 +221,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     // const neededAllowance = baseCost.add(depositTx.l2Value).add(operatorTip);
 
                     const neededAllowance = depositTx.overrides.value;
-                    // if (currentAllowance.lt(neededAllowance)) {
-                    const approveTx = await this.approveERC20(nativeERC20, BigNumber.from("0xfffffffffffffffffffffffffffffffff"), {
+                    if (currentAllowance.lt(neededAllowance)) {
+                    const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
                         bridgeAddress,
                         ...transaction.approveOverrides,
                     });
@@ -232,7 +232,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     //     ...transaction.approveOverrides,
                     // });
                         await approveTx.wait();
-                    // }
+                    }
                 }
 
                 const baseGasLimit = await this.estimateGasRequestExecute(depositTx, nativeERC20 == transaction.token);
