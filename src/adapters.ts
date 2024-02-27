@@ -225,7 +225,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                             bridgeAddress,
                             ...transaction.approveOverrides,
                         });
-                        await approveTx.wait();
+                        const approveReceipt = await approveTx.wait();
                     }
                 }
 
