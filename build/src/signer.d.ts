@@ -72,7 +72,6 @@ export declare class Signer extends Signer_base {
 }
 declare const L1Signer_base: {
     new (...args: any[]): {
-        baseCost: ethers.BigNumber;
         _providerL2(): Provider;
         _providerL1(): ethers.providers.Provider;
         _signerL1(): ethers.Signer;
@@ -244,7 +243,6 @@ export declare class L2VoidSigner extends L2VoidSigner_base {
 }
 declare const L1VoidSigner_base: {
     new (...args: any[]): {
-        baseCost: ethers.BigNumber;
         _providerL2(): Provider;
         _providerL1(): ethers.providers.Provider;
         _signerL1(): ethers.Signer;

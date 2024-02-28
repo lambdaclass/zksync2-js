@@ -46,7 +46,6 @@ interface TxSender {
 
 export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
     return class Adapter extends Base {
-        baseCost: BigNumber;
         _providerL2(): Provider {
             throw new Error("Must be implemented by the derived class!");
         }
@@ -209,18 +208,18 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
 
                     // // This base cost has to be priced in the ERC20 token because it will be paid on L2.
-                    this.baseCost = await this.getBaseCost({
+                    let baseCost = await this.getBaseCost({
                         gasPrice: await gasPriceForEstimation,
                         gasPerPubdataByte,
                         gasLimit: l2GasLimit,
                     });
 
                     const conversionRate = await this._providerL2().getConversionRate();
-                    this.baseCost = this.baseCost.mul(conversionRate);
+                    baseCost = baseCost.mul(conversionRate);
 
                     const operatorTip = depositTx.operatorTip;
 
-                    const neededAllowance = this.baseCost.add(depositTx.l2Value).add(operatorTip);
+                    const neededAllowance = baseCost.add(depositTx.l2Value).add(operatorTip);
 
                     console.log("BEFORE IF CHECKING ALLOWANCE");
                     if (currentAllowance.lt(neededAllowance)) {
@@ -229,6 +228,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                             ...transaction.approveOverrides,
                         });
                         const approveReceipt = await approveTx.wait();
+                        console.log(approveReceipt);
                     }
                 }
 
@@ -766,22 +766,22 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const gasPriceForEstimation = overrides.maxFeePerGas || overrides.gasPrice;
 
             // This base cost has to be priced in the ERC20 token because it will be paid on L2.
-            // baseCost = await this.getBaseCost({
-            //     gasPrice: await gasPriceForEstimation,
-            //     gasPerPubdataByte,
-            //     gasLimit: l2GasLimit,
-            // });
+            let baseCost = await this.getBaseCost({
+                gasPrice: await gasPriceForEstimation,
+                gasPerPubdataByte,
+                gasLimit: l2GasLimit,
+            });
 
             if (nativeERC20){
                 const conversionRate = await this._providerL2().getConversionRate();
-                // baseCost = baseCost.mul(conversionRate);
+                baseCost = baseCost.mul(conversionRate);
 
                 // overrides.value = 0;
             } else {
-                await checkBaseCost(this.baseCost, overrides.value);
+                await checkBaseCost(baseCost, overrides.value);
             }
 
-            let amount = nativeERC20 ? this.baseCost.add(operatorTip).add(l2Value) : 0;
+            let amount = nativeERC20 ? baseCost.add(operatorTip).add(l2Value) : 0;
 
             return await zksyncContract.populateTransaction.requestL2Transaction(
                 contractAddress,
