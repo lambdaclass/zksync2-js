@@ -109,7 +109,8 @@ function AdapterL1(Base) {
             const depositTx = await this.getDepositTx(transaction, nativeERC20);
             if (transaction.token == utils_1.ETH_ADDRESS || nativeERC20 == transaction.token) {
                 // Check allowance only if we are operating with a native ERC20
-                const bridgeAddress = (await this.getL1BridgeContracts()).erc20.address;
+                // const bridgeAddress = (await this.getL1BridgeContracts()).erc20.address;
+                const bridgeAddress = (await this.getMainContract()).address;
                 const currentAllowance = ethers_1.BigNumber.from(await this.getAllowanceL1(nativeERC20, bridgeAddress));
                 const overrides = transaction.overrides;
                 await insertGasPrice(this._providerL1(), overrides);
