@@ -138,7 +138,7 @@ function AdapterL1(Base) {
                         console.log(approveReceipt);
                     }
                 }
-                const baseGasLimit = await this.estimateGasRequestExecute(depositTx, nativeERC20 == transaction.token);
+                const baseGasLimit = await this.estimateGasRequestExecute(depositTx, nativeERC20 == transaction.token, baseCost);
                 const gasLimit = (0, utils_1.scaleGasLimit)(baseGasLimit);
                 (_a = depositTx.overrides) !== null && _a !== void 0 ? _a : (depositTx.overrides = {});
                 (_b = (_d = depositTx.overrides).gasLimit) !== null && _b !== void 0 ? _b : (_d.gasLimit = gasLimit);
@@ -426,7 +426,7 @@ function AdapterL1(Base) {
             return this._providerL2().getPriorityOpResponse(await this._signerL1().sendTransaction(requestExecuteTx));
         }
         async estimateGasRequestExecute(transaction, nativeERC20, baseCost) {
-            const requestExecuteTx = await this.getRequestExecuteTx(transaction, nativeERC20);
+            const requestExecuteTx = await this.getRequestExecuteTx(transaction, nativeERC20, baseCost);
             delete requestExecuteTx.gasPrice;
             delete requestExecuteTx.maxFeePerGas;
             delete requestExecuteTx.maxPriorityFeePerGas;

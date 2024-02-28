@@ -232,7 +232,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                     }
                 }
 
-                const baseGasLimit = await this.estimateGasRequestExecute(depositTx, nativeERC20 == transaction.token);
+                const baseGasLimit = await this.estimateGasRequestExecute(depositTx, nativeERC20 == transaction.token, baseCost);
                 const gasLimit = scaleGasLimit(baseGasLimit);
 
                 depositTx.overrides ??= {};
@@ -719,7 +719,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             refundRecipient?: Address;
             overrides?: ethers.PayableOverrides;
         }, nativeERC20?: boolean, baseCost?: BigNumber): Promise<ethers.BigNumber> {
-            const requestExecuteTx = await this.getRequestExecuteTx(transaction, nativeERC20);
+            const requestExecuteTx = await this.getRequestExecuteTx(transaction, nativeERC20, baseCost);
 
             delete requestExecuteTx.gasPrice;
             delete requestExecuteTx.maxFeePerGas;
