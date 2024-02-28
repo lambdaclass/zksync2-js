@@ -194,7 +194,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             if (transaction.token == ETH_ADDRESS || nativeERC20 == transaction.token) {
                 // Check allowance only if we are operating with a native ERC20
                 if (nativeERC20 == transaction.token) {
-                    const bridgeAddress = (await this.getMainContract()).address;
+                    // const bridgeAddress = (await this.getMainContract()).address;
+                    const bridgeAddress = (await this.getL1BridgeContracts()).erc20.address;
                     const currentAllowance = BigNumber.from(await this.getAllowanceL1(nativeERC20, bridgeAddress));
 
                     const overrides = transaction.overrides;
