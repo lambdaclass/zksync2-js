@@ -127,12 +127,14 @@ function AdapterL1(Base) {
                     baseCost = baseCost.mul(conversionRate);
                     const operatorTip = depositTx.operatorTip;
                     const neededAllowance = baseCost.add(depositTx.l2Value).add(operatorTip);
+                    console.log("BEFORE IF CHECKING ALLOWANCE");
                     if (currentAllowance.lt(neededAllowance)) {
                         const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
                             bridgeAddress,
                             ...transaction.approveOverrides,
                         });
-                        await approveTx.wait();
+                        const approveReceipt = await approveTx.wait();
+                        console.log(approveReceipt);
                     }
                 }
                 const baseGasLimit = await this.estimateGasRequestExecute(depositTx, nativeERC20 == transaction.token);

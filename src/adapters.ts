@@ -220,6 +220,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
                     const neededAllowance = baseCost.add(depositTx.l2Value).add(operatorTip);
 
+                    console.log("BEFORE IF CHECKING ALLOWANCE");
                     if (currentAllowance.lt(neededAllowance)) {
                         const approveTx = await this.approveERC20(nativeERC20, neededAllowance, {
                             bridgeAddress,
