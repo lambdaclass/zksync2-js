@@ -33,6 +33,7 @@ declare const Wallet_base: {
     };
 } & {
     new (...args: any[]): {
+        baseCost: ethers.BigNumber;
         _providerL2(): Provider;
         _providerL1(): ethers.providers.Provider;
         _signerL1(): ethers.Signer;

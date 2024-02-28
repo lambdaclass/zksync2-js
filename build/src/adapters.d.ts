@@ -8,6 +8,7 @@ interface TxSender {
 }
 export declare function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase): {
     new (...args: any[]): {
+        baseCost: BigNumber;
         _providerL2(): Provider;
         _providerL1(): ethers.providers.Provider;
         _signerL1(): ethers.Signer;
