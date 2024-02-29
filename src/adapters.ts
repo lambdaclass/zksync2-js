@@ -776,7 +776,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 const conversionRate = await this._providerL2().getConversionRate();
                 // baseCost = baseCost.mul(conversionRate);
 
-                // overrides.value = 0;
+                overrides.value = 0;
             } else {
                 await checkBaseCost(baseCost, overrides.value);
             }
