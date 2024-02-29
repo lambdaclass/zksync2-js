@@ -166,7 +166,7 @@ declare const L1Signer_base: {
             gasPerPubdataByte?: ethers.BigNumberish;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }, nativeERC20?: boolean): Promise<import("./types").PriorityOpResponse>;
+        }, nativeERC20?: boolean, baseCost?: ethers.BigNumber): Promise<import("./types").PriorityOpResponse>;
         estimateGasRequestExecute(transaction: {
             contractAddress: string;
             calldata: ethers.utils.BytesLike;
@@ -177,7 +177,7 @@ declare const L1Signer_base: {
             gasPerPubdataByte?: ethers.BigNumberish;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }, nativeERC20?: boolean): Promise<ethers.BigNumber>;
+        }, nativeERC20?: boolean, baseCost?: ethers.BigNumber): Promise<ethers.BigNumber>;
         getRequestExecuteTx(transaction: {
             contractAddress: string;
             calldata: ethers.utils.BytesLike;
@@ -188,7 +188,7 @@ declare const L1Signer_base: {
             gasPerPubdataByte?: ethers.BigNumberish;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }, nativeERC20?: boolean): Promise<ethers.PopulatedTransaction>;
+        }, nativeERC20?: boolean, baseCost?: ethers.BigNumber): Promise<ethers.PopulatedTransaction>;
         sendTransaction(tx: ethers.providers.TransactionRequest): Promise<ethers.providers.TransactionResponse>;
         getAddress(): Promise<string>;
     };
@@ -337,7 +337,7 @@ declare const L1VoidSigner_base: {
             gasPerPubdataByte?: ethers.BigNumberish;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }, nativeERC20?: boolean): Promise<import("./types").PriorityOpResponse>;
+        }, nativeERC20?: boolean, baseCost?: ethers.BigNumber): Promise<import("./types").PriorityOpResponse>;
         estimateGasRequestExecute(transaction: {
             contractAddress: string;
             calldata: ethers.utils.BytesLike;
@@ -348,7 +348,7 @@ declare const L1VoidSigner_base: {
             gasPerPubdataByte?: ethers.BigNumberish;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }, nativeERC20?: boolean): Promise<ethers.BigNumber>;
+        }, nativeERC20?: boolean, baseCost?: ethers.BigNumber): Promise<ethers.BigNumber>;
         getRequestExecuteTx(transaction: {
             contractAddress: string;
             calldata: ethers.utils.BytesLike;
@@ -359,7 +359,7 @@ declare const L1VoidSigner_base: {
             gasPerPubdataByte?: ethers.BigNumberish;
             refundRecipient?: string;
             overrides?: ethers.PayableOverrides;
-        }, nativeERC20?: boolean): Promise<ethers.PopulatedTransaction>;
+        }, nativeERC20?: boolean, baseCost?: ethers.BigNumber): Promise<ethers.PopulatedTransaction>;
         sendTransaction(tx: ethers.providers.TransactionRequest): Promise<ethers.providers.TransactionResponse>;
         getAddress(): Promise<string>;
     };
